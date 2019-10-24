@@ -17,7 +17,7 @@ class Script {
     const ENV_FILENAME_PROD = "prod.env";
     const PROJECT_EXTRA_KEY = "gcloud:project";
     const SERVERPORT = "";
-    const PROJECT_ENTRYPOINT = "gcloud:entrypoint";
+    const PROJECT_ENTRYPOINT = "devserve:entrypoint";
 
     static function getProjectDir(Event $event) {
         $home = $event->getComposer()->getConfig()->get("home");
@@ -78,17 +78,28 @@ class Script {
         return $result;
     }
 
+    static function getRouterPath(Event $event) {
+        $packageData = Paths::getPackageData();
+        $vendorDir = $event->getComposer()->getConfig()->get('vendor-dir');
+        $packagePath = str_replace("/", DIRECTORY_SEPARATOR, $packageData["name"]);
+        $routerPath = join(DIRECTORY_SEPARATOR, [
+            $vendorDir,
+            $packagePath,
+            "router.php"
+        ]);
+        return $routerPath;
+    }
+
     static function devserve(Event $event, $dryRun = false) {
         $port = 2004;
         $host = "0.0.0.0";
-        $root = null;
-        $entrypoint = realpath(dirname(__FILE__) . DIRECTORY_SEPARATOR . ".." . DIRECTORY_SEPARATOR . "entrypoint-dev.php");
-        $event->getIO()->write("Starting Server at entrypoint:" . $entrypoint);
-
+        $root = "dist/";
+        $entrypoint = self::getRouterPath($event);
+        $event->getIO()->write("Starting Server at port:" . $port);
         if ($dryRun) {
             return true;
         } else {
-            $result =  Cmds::buildIn($host, $port, $entrypoint, $root);
+            $result = Cmds::buildIn($host, $port, $entrypoint, $root);
             $event->getIO()->write($result);
         }
     }

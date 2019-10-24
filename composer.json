@@ -10,7 +10,7 @@
     }
   ],
   "require": {
-    "vlucas/phpdotenv": "^3.6@dev",
+    "vlucas/phpdotenv": "^3.6",
     "symfony/yaml": "^4.3"
   },
   "require-dev": {

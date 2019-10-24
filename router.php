@@ -8,5 +8,5 @@ if (file_exists("../../autoload.php")) {
 
 use GaeFlow\Router;
 
-call_user_func_array(Router::class, []);
+return call_user_func_array(new Router(), []);
 

@@ -25,6 +25,17 @@ class Paths {
         return json_decode($content, JSON_OBJECT_AS_ARRAY);
     }
 
+    static function getPackageData() {
+        $path = join(DIRECTORY_SEPARATOR,[
+                dirname(__FILE__),
+                "..",
+                "composer.json"
+            ]
+        );
+        $content = file_get_contents($path);
+        return json_decode($content, JSON_OBJECT_AS_ARRAY);
+    }
+
     static function projectRoot() {
         return dirname(self::vendorDir());
     }

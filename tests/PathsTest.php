@@ -31,7 +31,5 @@ class PathsTest extends TestCase {
     public function testComposerJsonPath() {
         $composerJsonPath = Paths::composerJsonPath();
         $this->assertFileExists($composerJsonPath);
-
-        new \Composer\Script\Event();
     }
 }

@@ -2,7 +2,7 @@
 
 namespace GaeFlow;
 
-class ResultState {
+class ScriptErrors {
 
     const NO_PROJECT_KEY_IN_COMPOSER = -1000;
     const NO_PROJECT_KEY_IN_GCLOUD = -2000;

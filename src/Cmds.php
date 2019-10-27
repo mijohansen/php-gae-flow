@@ -11,10 +11,9 @@ class Cmds {
         return exec($cmd);
     }
 
-    static function buildIn($host,$port, $router, $root = null) {
+    static function buildIn($host, $port, $routerPath, $root = null) {
         $rootCmd = is_null($root) ? "" : "-t $root";
-        $phpStartCommand = "php $rootCmd -S $host:$port $router";
-        var_dump($phpStartCommand);
+        $phpStartCommand = "php $rootCmd -S $host:$port $routerPath";
         $result = exec($phpStartCommand);
         return $result;
     }

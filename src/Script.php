@@ -7,67 +7,47 @@ use Symfony\Component\Yaml\Yaml;
 
 /**
  *
- * Generic class that should be delivered as a package dependency.s
- * Class Gae
- * @package VkpNinja
+ * This class holds the scripts that could be run from composer.json as plugins.
+ * All config is done through adding extrafields to composer.json. So that is really
+ * the only interface that should be between this package and the package consumer.
+ *
+ * @package GaeFlow
  */
 class Script {
 
-    const ENV_FILENAME_DEV = "dev.env";
-    const ENV_FILENAME_PROD = "prod.env";
-    const PROJECT_EXTRA_KEY = "gcloud:project";
-    const SERVERPORT = "";
-    const PROJECT_ENTRYPOINT = "devserve:entrypoint";
-
-    static function getProjectDir(Event $event) {
-        $home = $event->getComposer()->getConfig()->get("home");
-        $gcloudProject = self::getProjectFromExtra($event);
-        return str_replace(".composer", "." . $gcloudProject, $home);
-    }
-
-    static function getProjectFromExtra(Event $event) {
-        $extra = $event->getComposer()->getPackage()->getExtra();
-        if (isset($extra[self::PROJECT_EXTRA_KEY])) {
-            return $extra[self::PROJECT_EXTRA_KEY];
-        } else {
-            return null;
-        }
-
-    }
-
     static function deploy(Event $event, $dryRun = false) {
-        $gcloudProject = self::getProjectFromExtra($event);
+        $gcloudProject = ScriptUtils::getProjectFromExtra($event);
         if (!strlen($gcloudProject)) {
-            $projectExtraKey = self::PROJECT_EXTRA_KEY;
+            $projectExtraKey = ComposerExtra::GCLOUD_PROJECT;
             $event->getIO()->write("You need to put '$projectExtraKey' in the extra section of composer.json.");
             $gcloudProject = Gcloud::getCurrentProject();
             if ($gcloudProject && $event->getIO()->askConfirmation("But you got $gcloudProject as default project. Should I add it?")) {
-                return ResultState::NO_PROJECT_KEY_IN_GCLOUD;
+                return ScriptErrors::NO_PROJECT_KEY_IN_GCLOUD;
             } else {
-                return ResultState::NO_PROJECT_KEY_IN_COMPOSER;
+                return ScriptErrors::NO_PROJECT_KEY_IN_COMPOSER;
             }
         }
-        $projectHome = self::getProjectDir($event);
+        $projectHome = ScriptUtils::getUserProjectDir($event);
         if (!is_dir($projectHome)) {
             $event->getIO()->writeError("You need to 'mkdir $projectHome'");
             if ($event->getIO()->askConfirmation("Should I create it?")) {
                 mkdir($projectHome);
             } else {
-                return ResultState::NO_PROJECT_SECRET_DIR;
+                return ScriptErrors::NO_PROJECT_SECRET_DIR;
             }
         }
-        $prodEnvPath = $projectHome . DIRECTORY_SEPARATOR . self::ENV_FILENAME_PROD;
+        $prodEnvPath = $projectHome . DIRECTORY_SEPARATOR . Paths::ENV_FILENAME_PROD;
         if (!is_file($prodEnvPath)) {
             $event->getIO()->writeError("You need to add properties at `$prodEnvPath`");
             if ($event->getIO()->askConfirmation("Should I create it?")) {
                 touch($prodEnvPath);
             } else {
-                return ResultState::NO_ENV_FILENAME_PROD;
+                return ScriptErrors::NO_ENV_FILENAME_PROD;
             }
         }
         if (!is_file("app.yaml")) {
             $event->getIO()->writeError("You need an app.yaml file.");
-            return ResultState::NO_APP_YAML;
+            return ScriptErrors::NO_APP_YAML;
         }
         $secretAppYamlName = "secret.app.yaml";
         $template = Yaml::parseFile("app.yaml");
@@ -78,28 +58,16 @@ class Script {
         return $result;
     }
 
-    static function getRouterPath(Event $event) {
-        $packageData = Paths::getPackageData();
-        $vendorDir = $event->getComposer()->getConfig()->get('vendor-dir');
-        $packagePath = str_replace("/", DIRECTORY_SEPARATOR, $packageData["name"]);
-        $routerPath = join(DIRECTORY_SEPARATOR, [
-            $vendorDir,
-            $packagePath,
-            "router.php"
-        ]);
-        return $routerPath;
-    }
-
-    static function devserve(Event $event, $dryRun = false) {
-        $port = 2004;
-        $host = "0.0.0.0";
-        $root = "dist/";
-        $entrypoint = self::getRouterPath($event);
+    static function serve(Event $event, $dryRun = false) {
+        $port = ComposerExtra::getServePort();
+        $host = ComposerExtra::getServeEntrypoint();
+        $root = ComposerExtra::getServeFolder();
+        $router = ScriptUtils::getRouterPath($event);
         $event->getIO()->write("Starting Server at port:" . $port);
         if ($dryRun) {
             return true;
         } else {
-            $result = Cmds::buildIn($host, $port, $entrypoint, $root);
+            $result = Cmds::buildIn($host, $port, $router, $root);
             $event->getIO()->write($result);
         }
     }

@@ -5,6 +5,8 @@ namespace GaeFlow;
 use Composer\Autoload\ClassLoader;
 
 class Paths {
+    const ENV_FILENAME_DEV = "dev.env";
+    const ENV_FILENAME_PROD = "prod.env";
 
     static function vendorDir() {
         if (defined("COMPOSER_VENDOR_DIR")) {
@@ -26,7 +28,7 @@ class Paths {
     }
 
     static function getPackageData() {
-        $path = join(DIRECTORY_SEPARATOR,[
+        $path = join(DIRECTORY_SEPARATOR, [
                 dirname(__FILE__),
                 "..",
                 "composer.json"
@@ -42,5 +44,9 @@ class Paths {
 
     static function getUserHomeDir() {
         return getenv("HOME") ? getenv("HOME") : getenv("USERPROFILE");
+    }
+
+    static function getUserProjectDir($gcloudProject) {
+        return Paths::getUserHomeDir() . DIRECTORY_SEPARATOR . "." . $gcloudProject;
     }
 }

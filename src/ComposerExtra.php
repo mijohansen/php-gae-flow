@@ -5,17 +5,17 @@ namespace GaeFlow;
 class ComposerExtra {
 
     const SERVE_ENTRYPOINT = "serve:entrypoint";
-    const SERVE_HOST = "serve:host";
+    const SERVE_ADDR = "serve:addr";
     const SERVE_PORT = "serve:port";
-    const SERVE_FOLDER = "serve:public";
+    const SERVE_DOCROOT = "serve:docroot";
     const GCLOUD_PROJECT = "gcloud:project";
 
     static function getServeEntrypoint() {
         return self::get(self::SERVE_ENTRYPOINT);
     }
 
-    static function getServeHost() {
-        return self::get(self::SERVE_HOST, "0.0.0.0");
+    static function getServeAddr() {
+        return self::get(self::SERVE_ADDR, "0.0.0.0");
     }
 
     static function getServePort() {
@@ -26,8 +26,8 @@ class ComposerExtra {
         return self::get(self::GCLOUD_PROJECT);
     }
 
-    static function getServeFolder() {
-        return self::get(self::SERVE_FOLDER, "/");
+    static function getServeDocroot() {
+        return self::get(self::SERVE_DOCROOT, "/");
     }
 
     static function getValues() {

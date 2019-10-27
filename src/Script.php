@@ -60,14 +60,14 @@ class Script {
 
     static function serve(Event $event, $dryRun = false) {
         $port = ComposerExtra::getServePort();
-        $host = ComposerExtra::getServeEntrypoint();
-        $root = ComposerExtra::getServeFolder();
+        $addr = ComposerExtra::getServeAddr();
+        $docroot = ComposerExtra::getServeDocroot();
         $router = ScriptUtils::getRouterPath($event);
         $event->getIO()->write("Starting Server at port:" . $port);
         if ($dryRun) {
             return true;
         } else {
-            $result = Cmds::buildIn($host, $port, $router, $root);
+            $result = Cmds::buildIn($addr, $port, $router, $docroot);
             $event->getIO()->write($result);
         }
     }

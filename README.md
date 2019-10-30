@@ -69,6 +69,31 @@ In composer.json add the following to the [extra data fields].
 }
 ```
 
+In the script section you could/should add the deploy-command.
+```json
+{
+  "scripts": {
+    "deploy": "GaeFlow\\Script::deploy",
+    "serve": "GaeFlow\\Script::serve"
+  }
+}
+```
+
+If you want to run scripts before the deploy-script. For instance build an
+frontend, that can be done by passing an array of commands like this:
+```json
+{
+  "scripts": {
+    "deploy": [
+      "yarn build",
+      "GaeFlow\\Script::deploy"
+    ]
+  }
+}
+```
+
+
+
 ## Tests
 Test can be ran with `composer test` and the project is using phpunit as 
 a testrunner.

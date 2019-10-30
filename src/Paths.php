@@ -3,28 +3,37 @@
 namespace GaeFlow;
 
 use Composer\Autoload\ClassLoader;
+use Composer\Script\Event;
+use ReflectionClass;
 
 class Paths {
+
     const ENV_FILENAME_DEV = "dev.env";
     const ENV_FILENAME_PROD = "prod.env";
 
-    static function vendorDir() {
+    static function composerJsonData(Event $event = null) {
+        $content = file_get_contents(self::composerJsonPath($event));
+        return json_decode($content, JSON_OBJECT_AS_ARRAY);
+    }
+
+    static function composerJsonPath(Event $event = null) {
+        return self::projectRoot($event) . DIRECTORY_SEPARATOR . "composer.json";
+    }
+
+    static function projectRoot(Event $event = null) {
+        return dirname(self::vendorDir($event));
+    }
+
+    static function vendorDir(Event $event = null) {
         if (defined("COMPOSER_VENDOR_DIR")) {
             $vendorDir = COMPOSER_VENDOR_DIR;
+        } elseif (!is_null($event)) {
+            $vendorDir = $event->getComposer()->getConfig()->get("vendor-dir");
         } else {
-            $reflection = new \ReflectionClass(ClassLoader::class);
+            $reflection = new ReflectionClass(ClassLoader::class);
             $vendorDir = dirname(dirname($reflection->getFileName()));
         }
         return $vendorDir;
-    }
-
-    static function composerJsonPath() {
-        return self::projectRoot() . DIRECTORY_SEPARATOR . "composer.json";
-    }
-
-    static function composerJsonData() {
-        $content = file_get_contents(self::composerJsonPath());
-        return json_decode($content, JSON_OBJECT_AS_ARRAY);
     }
 
     static function getPackageData() {
@@ -38,15 +47,11 @@ class Paths {
         return json_decode($content, JSON_OBJECT_AS_ARRAY);
     }
 
-    static function projectRoot() {
-        return dirname(self::vendorDir());
+    static function getUserProjectDir($gcloudProject) {
+        return Paths::getUserHomeDir() . DIRECTORY_SEPARATOR . "." . $gcloudProject;
     }
 
     static function getUserHomeDir() {
         return getenv("HOME") ? getenv("HOME") : getenv("USERPROFILE");
-    }
-
-    static function getUserProjectDir($gcloudProject) {
-        return Paths::getUserHomeDir() . DIRECTORY_SEPARATOR . "." . $gcloudProject;
     }
 }

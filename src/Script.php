@@ -59,9 +59,9 @@ class Script {
     }
 
     static function serve(Event $event, $dryRun = false) {
-        $port = ComposerExtra::getServePort();
-        $addr = ComposerExtra::getServeAddr();
-        $docroot = ComposerExtra::getServeDocroot();
+        $addr = ComposerExtra::getServeAddr($event);
+        $docroot = ComposerExtra::getServeDocroot($event);
+        $port = ComposerExtra::getServePort($event);
         $router = ScriptUtils::getRouterPath($event);
         $event->getIO()->write("Starting Server at port:" . $port);
         if ($dryRun) {
@@ -69,6 +69,18 @@ class Script {
         } else {
             $result = Cmds::buildIn($addr, $port, $router, $docroot);
             $event->getIO()->write($result);
+        }
+    }
+
+    static function sync(Event $event, $dryRun = false) {
+        $ideaPath = Paths::projectRoot($event) . DIRECTORY_SEPARATOR . ".idea";
+        $runConfLoc = $ideaPath . DIRECTORY_SEPARATOR . "runConfigurations";
+        $serveLocation = $runConfLoc . DIRECTORY_SEPARATOR . "gaeflow.xml";
+        if (is_dir($ideaPath)) {
+            if (!is_dir($runConfLoc)) {
+                mkdir($runConfLoc);
+            }
+            Intellij::createRunConfig()->asXML($serveLocation);
         }
     }
 

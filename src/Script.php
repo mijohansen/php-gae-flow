@@ -63,6 +63,13 @@ class Script {
         $docroot = ComposerExtra::getServeDocroot($event);
         $port = ComposerExtra::getServePort($event);
         $router = ScriptUtils::getRouterPath($event);
+        if (!is_null($docroot) && strlen($docroot) > 0) {
+            $projectRoot = Paths::projectRoot($event);
+            $docroot = str_replace('/', DIRECTORY_SEPARATOR, $docroot);
+            $docroot = str_replace('\\', DIRECTORY_SEPARATOR, $docroot);
+            $trimmed = trim($docroot, DIRECTORY_SEPARATOR);
+            $docroot = $projectRoot . DIRECTORY_SEPARATOR . $trimmed . DIRECTORY_SEPARATOR;
+        }
         $event->getIO()->write("Starting Server at port:" . $port);
         if ($dryRun) {
             return true;

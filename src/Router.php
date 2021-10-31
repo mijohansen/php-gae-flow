@@ -9,12 +9,12 @@ class Router {
     public static function loadDevEnv() {
         $gcloudProject = ComposerExtra::getGcloudProject();
         $envLocation = Paths::getUserProjectDir($gcloudProject);
+
         if(method_exists(Dotenv::class,"createImmutable" )){
             Dotenv::createImmutable($envLocation, Paths::ENV_FILENAME_DEV)->load();
         }else {
             Dotenv::create($envLocation, Paths::ENV_FILENAME_DEV)->load();
         }
-
     }
 
     public function __invoke() {

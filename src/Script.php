@@ -62,7 +62,7 @@ class Script {
         $addr = ComposerExtra::getServeAddr($event);
         $docroot = ComposerExtra::getServeDocroot($event);
         $port = ComposerExtra::getServePort($event);
-        $router = ScriptUtils::getRouterPath($event);
+        $routerPath = ScriptUtils::getRouterPath($event);
         if (!is_null($docroot) && strlen($docroot) > 0) {
             $projectRoot = Paths::projectRoot($event);
             $docroot = str_replace('/', DIRECTORY_SEPARATOR, $docroot);
@@ -74,7 +74,7 @@ class Script {
         if ($dryRun) {
             return true;
         } else {
-            $result = Cmds::buildIn($addr, $port, $router, $docroot);
+            $result = Cmds::buildIn($addr, $port, $routerPath, $docroot);
             $event->getIO()->write($result);
         }
     }
